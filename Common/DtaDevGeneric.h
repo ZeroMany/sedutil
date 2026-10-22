@@ -148,6 +148,7 @@ public:
 	 */
 	 uint8_t setBandsEnabled(int16_t rangeid, char * password);
 	 uint8_t setMBRDone(uint8_t state, char * Admin1Password) ;
+	 uint8_t setTryLimit(uint8_t limit, char * Admin1Password) ;
          /** Primitive to set the MBREnable flag.
          * @param state 0 or 1  
          * @param Admin1Password Locking SP authority with access to flag

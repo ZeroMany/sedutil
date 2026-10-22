@@ -18,6 +18,7 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 
  * C:E********************************************************************** */
 #include "os.h"
+#include <stdlib.h>
 #include "DtaOptions.h"
 #include "DtaLexicon.h"
 #include "Version.h"
@@ -31,6 +32,8 @@ void usage()
     printf("-v (optional)                       increase verbosity, one to five v's\n");
     printf("-n (optional)                       no password hashing. Passwords will be sent in clear text!\n");
     printf("-l (optional)                       log style output to stderr only\n");
+    printf("Any <password> can be given as - to type it at a hidden prompt instead.\n");
+    printf("This keeps it out of your shell history and the process list.\n");
     printf("actions \n");
     printf("--scan \n");
     printf("                                Scans the devices on the system \n");
@@ -81,6 +84,10 @@ void usage()
 	printf("                                Enable|Disable MBR shadowing \n");
 	printf("--setMBRDone <on|off> <Admin1password> <device> \n");
 	printf("                                set|unset MBRDone\n");
+	printf("--setTryLimit <0...32> <Admin1password> <device> \n");
+	printf("                                limit wrong password attempts before the\n");
+	printf("                                drive refuses more until power cycled (0 = no limit).\n");
+	printf("                                Not all drives allow this.\n");
 	printf("--loadPBAimage <Admin1password> <file> <device> \n");
 	printf("                                Write <file> to MBR Shadow area\n");
     printf("--revertTPer <SIDpassword> <device>\n");
@@ -105,6 +112,7 @@ void usage()
 	printf("sedutil-cli --query %s \n", DEVICEEXAMPLE);
 	printf("sedutil-cli --yesIreallywanttoERASEALLmydatausingthePSID <PSIDNODASHED> %s \n", DEVICEEXAMPLE);
 	printf("sedutil-cli --initialSetup <newSIDpassword> %s \n", DEVICEEXAMPLE);
+	printf("sedutil-cli --setLockingRange 0 RW - %s   (prompts for the password)\n", DEVICEEXAMPLE);
     return;
 }
 
@@ -274,6 +282,20 @@ uint8_t DtaOptions(int argc, char * argv[], DTA_OPTIONS * opts)
 			TESTARG(off, mbrstate, 0)
 			TESTARG(OFF, mbrstate, 0)
 			TESTFAIL("Invalid setMBRDone argument not <on|off>")
+			OPTION_IS(password)
+			OPTION_IS(device)
+			END_OPTION
+		BEGIN_OPTION(setTryLimit, 3)
+			{
+				char *end = NULL;
+				long limit = strtol(argv[i + 1], &end, 10);
+				if ((argv[i + 1][0] == '\0') || (*end != '\0') || (limit < 0) || (limit > 32)) {
+					LOG(E) << "Invalid setTryLimit argument, must be 0 to 32: " << argv[i + 1];
+					return 1;
+				}
+				opts->trylimit = (uint8_t)limit;
+			}
+			i++;
 			OPTION_IS(password)
 			OPTION_IS(device)
 			END_OPTION

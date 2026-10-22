@@ -16,6 +16,7 @@ SEDUTIL_COMMON_CODE = \
 	Common/DtaDevOpal.cpp Common/DtaDevOpal.h \
 	Common/DtaDiskType.cpp Common/DtaDiskType.h \
 	Common/DtaHashPwd.cpp Common/DtaHashPwd.h \
+	Common/DtaPassPrompt.cpp Common/DtaPassPrompt.h Common/DtaSecureZero.h \
 	Common/DtaHexDump.cpp Common/DtaHexDump.h \
 	Common/DtaResponse.cpp Common/DtaResponse.h \
 	Common/DtaSession.cpp Common/DtaSession.h \

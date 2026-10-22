@@ -801,6 +801,41 @@ uint8_t DtaDevOpal::setMBREnable(uint8_t mbrstate,	char * Admin1Password)
 	LOG(D1) << "Exiting DtaDevOpal::setMBREnable";
 	return 0;
 }
+uint8_t DtaDevOpal::setTryLimit(uint8_t limit, char * Admin1Password)
+{
+	LOG(D1) << "Entering DtaDevOpal::setTryLimit";
+	uint8_t lastRC;
+	std::vector<uint8_t> adminCPIN, value;
+	session = new DtaSession(this);
+	if (NULL == session) {
+		LOG(E) << "Unable to create session object ";
+		return DTAERROR_OBJECT_CREATE_FAILED;
+	}
+	if ((lastRC = session->start(OPAL_UID::OPAL_LOCKINGSP_UID, Admin1Password, OPAL_UID::OPAL_ADMIN1_UID)) != 0) {
+		delete session;
+		return lastRC;
+	}
+	if ((lastRC = getAuth4User((char *)"Admin1", 10, adminCPIN)) != 0) {
+		delete session;
+		return lastRC;
+	}
+	// limit is at most 32, so it fits in a single tiny-atom token
+	value.push_back((uint8_t)(limit & 0x3f));
+	if ((lastRC = setTable(adminCPIN, OPAL_TOKEN::TRYLIMIT, value)) != 0) {
+		LOG(E) << "The drive refused to set a try limit. Many drives do not allow "
+			"changing it; nothing was changed.";
+		delete session;
+		return lastRC;
+	}
+	if (limit)
+		LOG(I) << "Admin1 try limit set to " << (uint16_t)limit
+		<< ". After that many wrong passwords the drive refuses further attempts until it is power cycled.";
+	else
+		LOG(I) << "Admin1 try limit removed";
+	delete session;
+	LOG(D1) << "Exiting DtaDevOpal::setTryLimit";
+	return 0;
+}
 uint8_t DtaDevOpal::setMBRDone(uint8_t mbrstate, char * Admin1Password)
 {
 	LOG(D1) << "Entering DtaDevOpal::setMBRDone";
