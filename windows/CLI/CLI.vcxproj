@@ -35,6 +35,8 @@
     <ClInclude Include="..\..\Common\DtaDiskType.h" />
     <ClInclude Include="..\..\Common\DtaEndianFixup.h" />
     <ClInclude Include="..\..\Common\DtaHashPwd.h" />
+    <ClInclude Include="..\..\Common\DtaPassPrompt.h" />
+    <ClInclude Include="..\..\Common\DtaSecureZero.h" />
     <ClInclude Include="..\..\Common\DtaHexDump.h" />
     <ClInclude Include="..\..\Common\DtaLexicon.h" />
     <ClInclude Include="..\..\Common\DtaResponse.h" />
@@ -70,6 +72,7 @@
     <ClCompile Include="..\..\Common\DtaDevRuby1.cpp" />
     <ClCompile Include="..\..\Common\DtaDiskType.cpp" />
     <ClCompile Include="..\..\Common\DtaHashPwd.cpp" />
+    <ClCompile Include="..\..\Common\DtaPassPrompt.cpp" />
     <ClCompile Include="..\..\Common\DtaHexDump.cpp" />
     <ClCompile Include="..\..\Common\DtaOptions.cpp" />
     <ClCompile Include="..\..\Common\DtaResponse.cpp" />
@@ -89,32 +92,32 @@
     <ProjectGuid>{267E9D28-7245-4182-9740-F386F4299E83}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CLI</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>

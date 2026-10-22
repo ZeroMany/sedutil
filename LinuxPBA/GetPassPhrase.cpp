@@ -20,75 +20,56 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "os.h"
 #include "GetPassPhrase.h"
+#include "DtaSecureZero.h"
 #include <string>
 #include <termios.h>
 #include <stdio.h>
 using namespace std;
 
-static struct termios tiosold, tiosnew;
-/* Initialize new terminal i/o settings */
-void initTermios(int echo) 
-{
-  tcgetattr(0, &tiosold); /* grab old terminal i/o settings */
-  tiosnew = tiosold; /* make new settings same as old settings */
-  tiosnew.c_lflag &= ~ICANON; /* disable buffered i/o */
-  tiosnew.c_lflag &= echo ? ECHO : ~ECHO; /* set echo mode */
-  tcsetattr(0, TCSANOW, &tiosnew); /* use these new terminal i/o settings now */
-}
-
-/* Restore old terminal i/o settings */
-void resetTermios(void) 
-{
-  tcsetattr(0, TCSANOW, &tiosold);
-}
-
-/* Read 1 character - echo defines echo mode */
-char getch_(int echo=0) 
-{
-  char ch;
-  initTermios(echo);
-  ch = getchar();
-  resetTermios();
-  return ch;
-}
-
-/* Read 1 character without echo */
-char getch(void) 
-{
-  return getch_(0);
-}
-
+/* Read a password from the console without echoing it.
+ *
+ * Canonical mode, echo and keyboard signals (Ctrl+C, Ctrl+\, Ctrl+Z) are
+ * turned off for the whole prompt, so the prompt cannot be interrupted
+ * into a shell. Settings are restored before returning.
+ */
 string GetPassPhrase(const char *prompt, bool show_asterisk)
 {
-  const char BACKSPACE=127;
-  const char RETURN=10;
+  const int BACKSPACE = 127;
+  const int CTRL_H = 8;
+  struct termios tiosold, tiosnew;
+  bool have_tty = (tcgetattr(0, &tiosold) == 0);
   string password;
-  unsigned char ch=0;
+  password.reserve(256); // avoid reallocations leaving copies of the password
   LOG(D4) << "Enter GetPassPhrase" << endl;
-  printf("\n\n%s",prompt);
-  while((ch=getch_())!=RETURN)
-    {
-//      LOG(I) << "key value" << (uint16_t) ch << endl;
-       if(ch==BACKSPACE)
-         {
-            if(password.length()!=0)
-              {
-                 if(show_asterisk)
-                 printf("\b \b");
-                 password.resize(password.length()-1);
-              }
-         }
-       else if(ch!=27) // ignore 'escape' key
-         {
-             password+=ch;
-             if(show_asterisk)
-                 printf("*");
-         }
+  if (have_tty) {
+    tiosnew = tiosold;
+    tiosnew.c_lflag &= ~(ICANON | ECHO | ISIG);
+    tiosnew.c_cc[VMIN] = 1;
+    tiosnew.c_cc[VTIME] = 0;
+    tcsetattr(0, TCSANOW, &tiosnew);
+  }
+  printf("\n\n%s", prompt);
+  fflush(stdout);
+  for (;;) {
+    int ch = getchar();
+    if (ch == EOF || ch == '\n' || ch == '\r')
+      break;
+    if (ch == BACKSPACE || ch == CTRL_H) {
+      if (password.length() != 0) {
+        if (show_asterisk)
+          printf("\b \b");
+        password[password.length() - 1] = 0;
+        password.resize(password.length() - 1);
+      }
     }
-
+    else if (ch >= 32) { // ignore Escape and other control keys
+      password += (char)ch;
+      if (show_asterisk)
+        printf("*");
+    }
+    fflush(stdout);
+  }
+  if (have_tty)
+    tcsetattr(0, TCSANOW, &tiosold);
   return password;
 }
-
-
-
-
