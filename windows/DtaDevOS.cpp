@@ -84,7 +84,8 @@ void DtaDevOS::init(const char * devref)
 		_Inout_opt_(LPOVERLAPPED) NULL)) {
 		return;
 	}
-	// OVERLAPPED structure
+	LOG(D) << devref << " bus type " << (int)descriptor.BusType
+		<< " (3=ATA 7=USB 11=SATA 17=NVMe; other types are skipped)";
 	switch (descriptor.BusType) {
 	case BusTypeAta:
 	case BusTypeSata:
@@ -149,9 +150,12 @@ int DtaDevOS::diskScan()
 	printf("\nScanning for Opal compliant disks\n");
 	while (TRUE) {
 		sprintf_s(devname, 23, "\\\\.\\PhysicalDrive%i", i);
+		// Print the name before probing, so a drive that stops responding
+		// shows up as the last name on screen instead of a silent hang.
+		printf("%-22s", devname);
+		fflush(stdout);
 		d = new DtaDevGeneric(devname);
 		if (d->isPresent()) {
-			printf("%s", devname);
 			if (d->isAnySSC())
 				printf(" %s%s%s%s%s%s%s ", (d->isOpal1() ? "1" : " "),
 				(d->isOpal2() ? "2" : " "), (d->isEprise() ? "E" : " "),
@@ -166,7 +170,10 @@ int DtaDevOS::diskScan()
 				return 1;
 			}
 		}
-		else break;
+		else {
+			printf("not present\n");
+			break;
+		}
 		delete d;
 		i += 1;
 	}
