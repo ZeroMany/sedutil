@@ -40,9 +40,13 @@ jobs:
       - uses: microsoft/setup-msbuild@v2
       - name: Build (Release x64)
         run: msbuild windows\CLI\CLI.sln /m /p:Configuration=Release /p:Platform=x64
+      - name: Build GUI (Release x64)
+        run: msbuild windows\GUI\GUI.sln /m /p:Configuration=Release /p:Platform=x64
       - name: Password hash self-test
         run: windows\CLI\x64\Release\sedutil-cli.exe --validatePBKDF2
       - uses: actions/upload-artifact@v4
         with:
           name: sedutil-windows-x64
-          path: windows\CLI\x64\Release\sedutil-cli.exe
+          path: |
+            windows\CLI\x64\Release\sedutil-cli.exe
+            windows\GUI\x64\Release\sedutil-gui.exe
