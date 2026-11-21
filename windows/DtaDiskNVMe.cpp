@@ -34,46 +34,11 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-// Missing stuff pulled from MSDN
-//
-
-// STORAGE PROPERTY ID is defined but these #define values are missing
-#define StorageAdapterProtocolSpecificProperty (STORAGE_PROPERTY_ID) 49
+// STORAGE_PROTOCOL_SPECIFIC_DATA, STORAGE_PROTOCOL_DATA_DESCRIPTOR and
+// StorageAdapterProtocolSpecificProperty used to be defined here by hand.
+// The Windows 10 SDK (winioctl.h) now provides them.
 
 #define NVME_MAX_LOG_SIZE 4096  // value from random internet search
-typedef enum _STORAGE_PROTOCOL_TYPE {
-	ProtocolTypeUnknown = 0x00,
-	ProtocolTypeScsi,
-	ProtocolTypeAta,
-	ProtocolTypeNvme,
-	ProtocolTypeSd,
-	ProtocolTypeProprietary = 0x7E,
-	ProtocolTypeMaxReserved = 0x7F
-} STORAGE_PROTOCOL_TYPE, *PSTORAGE_PROTOCOL_TYPE;
-typedef struct _STORAGE_PROTOCOL_SPECIFIC_DATA {
-	STORAGE_PROTOCOL_TYPE ProtocolType;
-	DWORD                 DataType;
-	DWORD                 ProtocolDataRequestValue;
-	DWORD                 ProtocolDataRequestSubValue;
-	DWORD                 ProtocolDataOffset;
-	DWORD                 ProtocolDataLength;
-	DWORD                 FixedProtocolReturnData;
-	DWORD                 Reserved[3];
-} STORAGE_PROTOCOL_SPECIFIC_DATA, *PSTORAGE_PROTOCOL_SPECIFIC_DATA;
-
-typedef enum _STORAGE_PROTOCOL_NVME_DATA_TYPE {
-	NVMeDataTypeUnknown = 0,
-	NVMeDataTypeIdentify,
-	NVMeDataTypeLogPage,
-	NVMeDataTypeFeature
-} STORAGE_PROTOCOL_NVME_DATA_TYPE, *PSTORAGE_PROTOCOL_NVME_DATA_TYPE;
-typedef struct _STORAGE_PROTOCOL_DATA_DESCRIPTOR {
-	DWORD                          Version;
-	DWORD                          Size;
-	STORAGE_PROTOCOL_SPECIFIC_DATA ProtocolSpecificData;
-} STORAGE_PROTOCOL_DATA_DESCRIPTOR, *PSTORAGE_PROTOCOL_DATA_DESCRIPTOR;
-
-// End of missing stuff
 
 
 

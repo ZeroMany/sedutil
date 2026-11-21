@@ -479,6 +479,15 @@ uint8_t DtaDevEnterprise::setMBRDone(uint8_t mbrstate, char * Admin1Password)
 	return 0;
 }
 
+uint8_t DtaDevEnterprise::setTryLimit(uint8_t limit, char * Admin1Password)
+{
+	LOG(D1) << "Entering DtaDevEnterprise::setTryLimit";
+	if (NULL == Admin1Password) { LOG(E) << "This shouldn't happen " << (uint16_t)limit; }
+	LOG(E) << "setTryLimit is not supported on Enterprise SSC drives";
+	LOG(D1) << "Exiting DtaDevEnterprise::setTryLimit";
+	return DTAERROR_INVALID_COMMAND;
+}
+
 uint8_t DtaDevEnterprise::setupLockingRange(uint8_t lockingrange, uint64_t start, uint64_t length, char * password)
 {
 	uint8_t lastRC;

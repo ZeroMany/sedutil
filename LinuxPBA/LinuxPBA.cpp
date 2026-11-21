@@ -25,6 +25,7 @@ This software is Copyright 2014-2017 Bright Plaza Inc. <drivetrust@drivetrust.co
 #include "log.h"
 #include "GetPassPhrase.h"
 #include "UnlockSEDs.h"
+#include "DtaSecureZero.h"
 
 using namespace std;
 
@@ -39,11 +40,15 @@ int main(int argc, char** argv) {
     printf("Boot Authorization \n");
     string p = GetPassPhrase("Password: ");
     UnlockSEDs((char *)p.c_str());
-    if (strcmp(p.c_str(), "debug")) {
-        printf("\n Access granted. Starting the system... \n");
-        sync();
-        reboot(RB_AUTOBOOT);
-    }
+    // Wipe the password before leaving it in freed memory.
+    DtaSecureZero(&p[0], p.size());
+    p.clear();
+    // Always reboot. The PBA must never fall through to a shell: the PBA
+    // image has an empty root password, so any exit path here would hand
+    // a root prompt to whoever is at the keyboard.
+    printf("\n Starting the system... \n");
+    sync();
+    reboot(RB_AUTOBOOT);
     return 0;
 }
 

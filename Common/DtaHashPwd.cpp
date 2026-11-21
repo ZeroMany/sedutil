@@ -93,8 +93,8 @@ struct PBKDF_TestTuple
 };
 
 int testresult(std::vector<uint8_t> &result, const char * expected, size_t len) {
-	char work[50];
-	if (len > 50) return 1;
+	char work[64];
+	if (len > sizeof(work)) return 1;
 	int p = 0;
 	printf("Expected Result: %s\nActual Result  : ", expected);
 	for (uint32_t i = 0; i < len; i++) { printf("%02x", result[i + 2]); }; printf("\n");
@@ -131,22 +131,20 @@ int TestPBKDF2()
 {
     int pass = 1;
     // from draft-ietf-smime-password-03.txt, at http://www.imc.org/draft-ietf-smime-password
+    // PBKDF2-HMAC-SHA512 test vectors, the same algorithm used to hash
+    // drive passwords. Checked against Python's hashlib.pbkdf2_hmac('sha512').
     PBKDF_TestTuple testSet[] = {
-        // Draft PKCS #5 PBKDF2 Test Vectors http://tools.ietf.org/html/draft-josefsson-pbkdf2-test-vectors-06
-        // "password" (8 octets) S = "salt" (4 octets)	c = 1 DK = 0c60c80f961f0e71f3a9b524af6012062fe037a6
-        { 20, 1, "password", "salt", "0c60c80f961f0e71f3a9b524af6012062fe037a6"},
-        // "password" (8 octets) S = "salt" (4 octets)	c = 2 DK = ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957
-        { 20, 2, "password", "salt", "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957"},
-        // "password" (8 octets) S = "salt" (4 octets)	c = 4096 DK = 4b007901b765489abead49d926f721d065a429c1
-        { 20, 4096, "password", "salt", "4b007901b765489abead49d926f721d065a429c1"},
-        // "password" (8 octets) S = "salt" (4 octets)	c = 16777216 DK = eefe3d61cd4da4e4e9945b3d6ba2158c2634e984
-        //{ 20, 16777216, "password", "salt", "eefe3d61cd4da4e4e9945b3d6ba2158c2634e984" },
-        // "passwordPASSWORDpassword" (24 octets) S = "saltSALTsaltSALTsaltSALTsaltSALTsalt" (36 octets) c = 4096 DK = 3d2eec4fe41c849b80c8d83662c0e44a8b291a964cf2f07038
-        { 25, 4096, "passwordPASSWORDpassword", "saltSALTsaltSALTsaltSALTsaltSALTsalt",
-            "3d2eec4fe41c849b80c8d83662c0e44a8b291a964cf2f07038"},
-        // "pass\0word" (9 octets) S = "sa\0lt" (5 octets)	c = 4096 DK = 56fa6aa75548099dcc37d7f03425e0c3
-        //{ 16, 4096, "pass\0word", "sa\0lt", "56fa6aa75548099dcc37d7f03425e0c3" },
-        // program receives char * from OS so this test would fail but is not possible IRL
+        { 32, 1, "password", "salt",
+            "867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252"},
+        { 32, 2, "password", "salt",
+            "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53c"},
+        { 32, 4096, "password", "salt",
+            "d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5"},
+        { 40, 4096, "passwordPASSWORDpassword", "saltSALTsaltSALTsaltSALTsaltSALTsalt",
+            "8c0511f4c6e597c6ac6315d8f0362e225f3c501495ba23b868c005174dc4ee71115b59f9e60cd953"},
+        // sedutil's real settings: 500,000 iterations, 32 byte key, 20 byte serial-number salt
+        { 32, 500000, "correct horse battery staple", "S3RIALNUMBER12345678",
+            "48b6be0f2cdc254aa158363b4f6f4584fc3661810067eedcd11d92bdaf16a302"},
     };
 
     cout << "\nPKCS #5 PBKDF2 validation suite running ... \n\n";
@@ -156,6 +154,6 @@ int TestPBKDF2()
         cout << "passed\n";
     else
         cout << "**FAILED**\n";
-    return 0;
+    return pass ? 0 : 1;
 }
 

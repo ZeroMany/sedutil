@@ -1,3 +1,15 @@
+Windows 11 / Visual Studio 2022 (current)
+-----------------------------------------
+Install Visual Studio 2022 (Community is fine) with the "Desktop development with C++"
+workload and a Windows 10 or 11 SDK, plus Git for Windows.
+Open windows\CLI\CLI.sln, pick Release and x64, then Build -> Build Solution.
+Or from a "Developer PowerShell for VS 2022":
+    msbuild windows\CLI\CLI.sln /p:Configuration=Release /p:Platform=x64
+The result is windows\CLI\x64\Release\sedutil-cli.exe. Run it from an administrator prompt.
+GitHub Actions builds this on every push (.github/workflows/build.yml).
+
+Older instructions (Visual Studio 2015) follow.
+-----------------------------------------
 Install Microsoft Visual Studio 2015
 Add C++ tools to VS2015
 In Windows Powershell, VIA Powershell:

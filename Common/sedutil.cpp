@@ -20,6 +20,8 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include "os.h"
 #include "DtaHashPwd.h"
+#include "DtaPassPrompt.h"
+#include "DtaSecureZero.h"
 #include "DtaOptions.h"
 #include "DtaLexicon.h"
 #include "DtaDevGeneric.h"
@@ -56,12 +58,71 @@ int isValidSEDDisk(char *devname)
 	return 0;
 }
 
+/* Passwords typed at a hidden prompt. Wiped when the program exits. */
+static struct PromptedPasswords {
+	std::string password, newpassword, confirm;
+	~PromptedPasswords() {
+		DtaSecureZero(&password[0], password.size());
+		DtaSecureZero(&newpassword[0], newpassword.size());
+		DtaSecureZero(&confirm[0], confirm.size());
+	}
+} prompted;
+
+/* A password argument of "-" means: ask for it at a hidden prompt instead,
+ * so it never appears in the command line, shell history or process list.
+ * Returns 0 on success. */
+static int promptForPasswords(char * argv[], DTA_OPTIONS &opts)
+{
+	if (opts.password && !strcmp(argv[opts.password], "-")) {
+		// initialSetup sets a brand new password, so ask for it twice.
+		bool isNew = (opts.action == sedutiloption::initialSetup);
+		if (!DtaReadHiddenPassword(isNew ? "New password: " : "Password: ", prompted.password)) {
+			LOG(E) << "No password entered";
+			return DTAERROR_COMMAND_ERROR;
+		}
+		if (isNew) {
+			if (!DtaReadHiddenPassword("Repeat new password: ", prompted.confirm) ||
+				prompted.password != prompted.confirm) {
+				LOG(E) << "The new passwords do not match";
+				return DTAERROR_COMMAND_ERROR;
+			}
+		}
+		argv[opts.password] = &prompted.password[0];
+	}
+	if (opts.newpassword && !strcmp(argv[opts.newpassword], "-")) {
+		if (!DtaReadHiddenPassword("New password: ", prompted.newpassword) ||
+			!DtaReadHiddenPassword("Repeat new password: ", prompted.confirm)) {
+			LOG(E) << "No password entered";
+			return DTAERROR_COMMAND_ERROR;
+		}
+		if (prompted.newpassword != prompted.confirm) {
+			LOG(E) << "The new passwords do not match";
+			return DTAERROR_COMMAND_ERROR;
+		}
+		argv[opts.newpassword] = &prompted.newpassword[0];
+	}
+	return 0;
+}
+
 int main(int argc, char * argv[])
 {
 	DTA_OPTIONS opts;
 	DtaDev *tempDev = NULL, *d = NULL;
 	if (DtaOptions(argc, argv, &opts)) {
 		return DTAERROR_COMMAND_ERROR;
+	}
+	if (promptForPasswords(argv, opts)) {
+		return DTAERROR_COMMAND_ERROR;
+	}
+	// Unhashed (-n) passwords are sent as-is and the drive only stores 32
+	// bytes. Refuse longer ones instead of silently cutting them short,
+	// which would make the drive's password differ from what was typed.
+	if (opts.no_hash_passwords) {
+		if ((opts.password && strlen(argv[opts.password]) > 32) ||
+			(opts.newpassword && strlen(argv[opts.newpassword]) > 32)) {
+			LOG(E) << "Passwords used with -n must be 32 characters or fewer";
+			return DTAERROR_COMMAND_ERROR;
+		}
 	}
 	
 	if ((opts.action != sedutiloption::scan) && 
@@ -185,6 +246,10 @@ int main(int argc, char * argv[])
         LOG(D) << "Set band[" << opts.lockingrange << "] enabled";
         return (d->setBandsEnabled(opts.lockingrange, argv[opts.password]));
         break;
+	case sedutiloption::setTryLimit:
+		LOG(D) << "Setting Admin1 try limit to " << (uint16_t)opts.trylimit << " on " << argv[opts.device];
+		return d->setTryLimit(opts.trylimit, argv[opts.password]);
+		break;
 	case sedutiloption::setMBRDone:
 		LOG(D) << "Setting MBRDone " << (uint16_t)opts.mbrstate;
 		return (d->setMBRDone(opts.mbrstate, argv[opts.password]));
@@ -250,8 +315,7 @@ int main(int argc, char * argv[])
 		break;
 	case sedutiloption::validatePBKDF2:
         LOG(D) << "Performing PBKDF2 validation ";
-        TestPBKDF2();
-        break;
+        return TestPBKDF2();
 	case sedutiloption::yesIreallywanttoERASEALLmydatausingthePSID:
 	case sedutiloption::PSIDrevert:
 		LOG(D) << "Performing a PSID Revert on " << argv[opts.device] << " with password " << argv[opts.password];

@@ -163,6 +163,7 @@ typedef enum _OPAL_TOKEN {
 	VALUES = 0x01,
 	// authority table
 	PIN = 0x03,
+	TRYLIMIT = 0x05, // C_PIN column: failed attempts allowed before lockout
 	// locking tokens
 	RANGESTART = 0x03,
 	RANGELENGTH = 0x04,
