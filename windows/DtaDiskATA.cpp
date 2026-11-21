@@ -77,7 +77,11 @@ uint8_t DtaDiskATA::sendCmd(ATACOMMAND cmd, uint8_t protocol, uint16_t comID,
 
     ata->DataBuffer = buffer;
     ata->DataTransferLength = bufferlen;
-    ata->TimeOutValue = 300;
+    // Reads (IDENTIFY, Level 0 discovery, queries) get a short timeout so a
+    // drive or driver that ignores TRUSTED RECEIVE can't stall a scan for
+    // 5 minutes per command. Writes keep the long timeout: a revert or erase
+    // can take a while and must not be reported as failed while still running.
+    ata->TimeOutValue = (IF_SEND == cmd) ? 300 : 20;
     /* these were a b**** to find  defined in TCG specs but location is defined
      * in ATA spec */
     if (IDENTIFY != cmd) {

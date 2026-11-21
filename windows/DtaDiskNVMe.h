@@ -20,6 +20,16 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "os.h"
 #include "DtaDiskType.h"
+#pragma warning(push)
+#pragma warning(disable : 4091)
+#include <ntddscsi.h>
+#pragma warning(pop)
+/** SCSI pass-through request with room for sense data. */
+typedef struct _SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER {
+	SCSI_PASS_THROUGH_DIRECT sptd;
+	ULONG             Filler;      // realign buffer to double word boundary
+	UCHAR             ucSenseBuf[32];
+} SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, *PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER;
 /** Device specific implementation of disk access functions. */
 
 class DtaDiskNVMe : public DtaDiskType {
@@ -43,9 +53,9 @@ public:
 	* @param bufferlen length of the input/output buffer
 	*/
 	uint8_t	sendCmd(ATACOMMAND cmd, uint8_t protocol, uint16_t comID,
-		void * buffer, uint16_t bufferlen);
+		void * buffer, uint32_t bufferlen) override;
 	/** OS specific routine to send an ATA identify to the device */
-	void identify(OPAL_DiskInfo& disk_info);
+	void identify(OPAL_DiskInfo& disk_info) override;
 private:
 	HANDLE hDev; /**< Windows device handle */
 	uint8_t isOpen = FALSE;
