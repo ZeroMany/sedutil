@@ -4,6 +4,8 @@ Intel and AMD Ryzen: This SEDutil fork includes support for intel and AMD Ryzen 
 
 Note: This version of SEDutil is not compatible with SHA-1 versions of SEDutil
 
+Quick reference for everyday commands (check, lock, unlock, change password, set up, remove): [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md)
+
 This software is Copyright 2014-2017 Bright Plaza Inc. <drivetrust@drivetrust.com>
 
 This file is part of sedutil.
