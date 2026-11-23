@@ -1,0 +1,24 @@
+# One GPT disk with one FAT EFI System Partition holding the kernel as
+# the removable-media boot path, /EFI/BOOT/BOOTX64.EFI.
+image esp.vfat {
+	vfat {
+		label = "@LABEL@"
+		file EFI/BOOT/BOOTX64.EFI {
+			image = "bzImage"
+		}
+	}
+	size = 30M
+}
+
+image @IMAGE@ {
+	hdimage {
+		partition-table-type = "gpt"
+	}
+	partition esp {
+		image = "esp.vfat"
+		partition-type-uuid = "U"
+		offset = 1M
+		bootable = true
+	}
+	size = 32M
+}

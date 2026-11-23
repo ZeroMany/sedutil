@@ -1,0 +1,104 @@
+name: pba
+
+# Builds the UEFI PBA and Rescue images with Buildroot, boot-tests them in
+# QEMU, and publishes them. Every run uploads the images as workflow
+# artifacts; a version tag (v*) also publishes them as a GitHub Release.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+    paths:
+      - 'images/uefi/**'
+      - 'LinuxPBA/**'
+      - 'Common/**'
+      - 'linux/**'
+      - 'configure.ac'
+      - 'Makefile.am'
+      - '.github/workflows/pba.yml'
+  pull_request:
+    paths:
+      - 'images/uefi/**'
+      - 'LinuxPBA/**'
+      - 'Common/**'
+      - 'linux/**'
+      - 'configure.ac'
+      - 'Makefile.am'
+      - '.github/workflows/pba.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [pba, rescue]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc bison flex cpio rsync unzip \
+            file wget libelf-dev libssl-dev python3 qemu-system-x86 ovmf
+
+      - name: Cache downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/sedutil-build/dl
+          key: br-dl-${{ matrix.kind }}-${{ hashFiles('images/uefi/build.sh', 'images/uefi/external/configs/*') }}
+          restore-keys: br-dl-${{ matrix.kind }}-
+
+      - name: Build
+        run: images/uefi/build.sh ${{ matrix.kind }} ~/sedutil-build
+
+      - name: Enable KVM for the boot test
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
+
+      - name: Boot test in QEMU
+        run: python3 images/uefi/test/qemu_boot_test.py ${{ matrix.kind }} ~/sedutil-build/${{ matrix.kind }}/images/sedutil-${{ matrix.kind }}-uefi64.img
+
+      - name: Collect files
+        run: |
+          mkdir -p dist
+          IMG=~/sedutil-build/${{ matrix.kind }}/images
+          cp $IMG/sedutil-${{ matrix.kind }}-uefi64.img $IMG/BOOTX64-${{ matrix.kind }}.EFI dist/
+          gzip -k9 dist/sedutil-${{ matrix.kind }}-uefi64.img
+          cp ~/sedutil-build/${{ matrix.kind }}/.config dist/buildroot-${{ matrix.kind }}.config
+          cp ~/sedutil-build/${{ matrix.kind }}/build/linux-*/.config dist/linux-${{ matrix.kind }}.config
+          (cd dist && sha256sum * > SHA256SUMS-${{ matrix.kind }}.txt && cat SHA256SUMS-${{ matrix.kind }}.txt)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sedutil-${{ matrix.kind }}-uefi64
+          path: dist
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --title "sedutil $GITHUB_REF_NAME" --notes "UEFI PBA and Rescue images. Check files against the SHA256SUMS files before loading them." \
+            *.img.gz *.EFI SHA256SUMS-*.txt

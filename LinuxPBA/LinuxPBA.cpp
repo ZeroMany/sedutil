@@ -43,9 +43,8 @@ int main(int argc, char** argv) {
     // Wipe the password before leaving it in freed memory.
     DtaSecureZero(&p[0], p.size());
     p.clear();
-    // Always reboot. The PBA must never fall through to a shell: the PBA
-    // image has an empty root password, so any exit path here would hand
-    // a root prompt to whoever is at the keyboard.
+    // Always reboot. The PBA must never fall through to anything else:
+    // whatever runs after it would run as root with the drives unlocked.
     printf("\n Starting the system... \n");
     sync();
     reboot(RB_AUTOBOOT);

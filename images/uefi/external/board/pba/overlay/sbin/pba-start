@@ -1,0 +1,12 @@
+#!/bin/sh
+# Start the PBA on the console. Runs from inittab on tty1.
+# Ctrl+C, Ctrl+\ and Ctrl+Z are ignored so the prompt cannot be interrupted.
+trap '' INT QUIT TSTP
+# Status for the CI boot test and serial consoles. Never carries secrets.
+echo "sedutil-pba: ready" > /dev/ttyS0 2>/dev/null
+clear
+/usr/sbin/linuxpba 2>/dev/null
+# linuxpba reboots by itself. If it ever returns (crash, bug), reboot here so
+# boot can never continue anywhere else.
+sync
+reboot -f
