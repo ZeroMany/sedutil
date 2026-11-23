@@ -25,6 +25,8 @@ you're set up, see [QUICK-REFERENCE-WINDOWS.md](QUICK-REFERENCE-WINDOWS.md) (Win
 7. [Living with encrypted drives](#7-living-with-encrypted-drives)
 8. [If something goes wrong](#8-if-something-goes-wrong)
 9. [Turn encryption off](#9-turn-encryption-off)
+10. [Questions and answers](#10-questions-and-answers)
+11. [Words you'll see](#11-words-youll-see)
 
 ## 1. Before you start
 
@@ -374,3 +376,75 @@ it up again whenever you like.
 
 **When you're done with the rescue USB, always finish with `poweroff`**, so
 every change takes effect and the drives lock.
+
+## 10. Questions and answers
+
+### What are the SID and Admin1 passwords, and should they be the same?
+
+Every Opal drive has two passwords that matter here:
+
+| Password | What it's for | Commands that ask for it |
+|---|---|---|
+| **Admin1** (the everyday one) | Locking and unlocking the drive, and managing the boot screen. This is the password the PBA checks at every power-on. | `--setlockingrange`, `--enablelockingrange`, `--disablelockingrange`, `--setmbrdone`, `--setmbrenable`, `--loadpbaimage`, `--settrylimit`, `--revertnoerase` |
+| **SID** (the owner one) | Owning the drive. You only need it to change the SID password itself or to reset the drive to factory state. | `--setsidpassword`, `--reverttper` |
+
+`--initialsetup` sets both to the same password.
+
+**Our recommendation: keep them the same, on every drive.** Some reasons:
+
+- The boot screen tries the one password you type on every drive. Only Admin1
+  matters there, but keeping SID the same means one password does everything.
+- A separate SID password adds little protection for a home PC. Someone who
+  knows your Admin1 password can already unlock the drive and turn encryption
+  off with `--revertnoerase`. Someone holding the drive can always erase it with
+  the PSID printed on its label.
+- A second password is one more thing to forget. Without the SID password,
+  `--reverttper` won't work, and the only way to reset the drive is a PSID
+  erase, which wipes the data.
+
+If you do choose different passwords, write down which is which, and remember
+that the PBA only accepts the Admin1 password. When you change passwords,
+change both (see [section 7](#7-living-with-encrypted-drives)).
+
+### Does sedutil store my password?
+
+No. sedutil turns your password into a long key using SHA-512 (PBKDF2), mixed
+with the drive's serial number. That key is sent to the drive, and only the
+drive keeps it. Because the serial number is part of the mix, the same password
+gives a different key on each drive, and a key taken from one drive is useless
+on another.
+
+This is also why this fork's PBA and rescue images don't work with drives set
+up by the original sedutil, which uses SHA-1. Set up and unlock your drives
+with tools from the same family.
+
+### What does an error message mean?
+
+| Message | Usually means | What to do |
+|---|---|---|
+| `NOT_AUTHORIZED` | Wrong password | Check for typos and the US keyboard layout, then try again |
+| `AUTHORITY_LOCKED_OUT` | Too many wrong passwords | Power the PC off fully, then try again |
+| `SP_BUSY` | Another program is using the drive's security features, or an earlier command didn't finish cleanly | Close other drive tools. If that doesn't help, power the PC off fully |
+| `INVALID_PARAMETER` | The command doesn't fit the drive's current state, usually because a step was skipped | Make sure `--initialsetup` ran and succeeded before the other setup commands |
+
+## 11. Words you'll see
+
+| Word | Meaning |
+|---|---|
+| **SED** | Self-encrypting drive. It encrypts everything it stores, all the time, in its own hardware. |
+| **Opal** | The standard that lets software like sedutil control a SED's locking. `--scan` shows `2` for Opal 2. |
+| **PBA** | Pre-boot authorization: the small unlock screen that asks for your password before Windows starts. |
+| **Shadow MBR** | A hidden area on the drive that holds the PBA. While the drive is locked, the PC sees this area instead of your real data. |
+| **MBR done** | A flag that tells the drive to stop showing the PBA and show your real data. The PBA sets it after unlocking. |
+| **Locking range** | A part of the drive that can be locked. Range 0 is the whole drive, which is what this guide uses. |
+| **Admin1** | The everyday password that locks and unlocks the drive. See [section 10](#what-are-the-sid-and-admin1-passwords-and-should-they-be-the-same). |
+| **SID** | The owner password. See [section 10](#what-are-the-sid-and-admin1-passwords-and-should-they-be-the-same). |
+| **MSID** | The factory default password, readable by anyone. A drive that still uses it isn't protected. |
+| **PSID** | A code printed on the drive's label. It can always reset the drive, but erases everything. |
+| **Rescue USB** | A small Linux system that runs from a USB stick, with sedutil on it, for setup and recovery. |
+
+---
+
+Some explanations in this guide are adapted from the original
+[sedutil wiki](https://github.com/Drive-Trust-Alliance/sedutil/wiki),
+Copyright 2015-2017 Bright Plaza Inc.
