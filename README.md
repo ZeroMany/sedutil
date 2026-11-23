@@ -22,6 +22,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
+The full license text is in [COPYING](COPYING).
 
 
 sedutil - The Drive Trust Alliance Self Encrypting Drive Utility
