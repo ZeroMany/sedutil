@@ -106,6 +106,8 @@ Notes:
 **Change the password.** A drive has two passwords: SID (owner) and Admin1
 (locking). `--initialSetup` makes them the same, and the boot screen unlocks
 every drive with the one password you type, so keep both passwords the same on all drives.
+The boot screen only checks Admin1; SID is needed only for `--setSIDPassword` and
+`--revertTPer`. See [Questions and answers](FDE-SETUP-GUIDE.md#10-questions-and-answers) in the setup guide for why keeping them the same is the safer choice.
 
 ```bash
 sudo sedutil-cli --setSIDPassword - - /dev/nvme0       # current, then new twice
@@ -192,7 +194,8 @@ sudo sedutil-cli --yesIreallywanttoERASEALLmydatausingthePSID <PSID> /dev/nvme0
 |---|---|
 | `NOT_AUTHORIZED` | Wrong password |
 | `AUTHORITY_LOCKED_OUT` | Too many wrong passwords (try limit reached). Power the drive off and on |
-| `SP_BUSY` | Another program is using the drive's security features. Close it, or restart |
+| `SP_BUSY` | Another program is using the drive's security features. Close it. If that doesn't help, power the PC off fully |
+| `INVALID_PARAMETER` | A step was skipped, usually `--initialSetup` before the other setup commands |
 | `Invalid or unsupported disk` | Wrong device name, or the drive isn't an Opal drive |
 | `The Kernel flag libata.allow_tpm is not set correctly` | `libata.allow_tpm=1` is missing from the kernel command line (SATA drives only) |
 
