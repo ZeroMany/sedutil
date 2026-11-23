@@ -23,6 +23,7 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
 #include "DtaEndianFixup.h"
 #include "DtaHexDump.h"
 #include "DtaStructures.h"
+#include "DtaSecureZero.h"
 
 using namespace std;
 
@@ -115,7 +116,7 @@ DtaCommand::addToken(uint64_t number)
 }
 
 void
-DtaCommand::addToken(vector<uint8_t> token)
+DtaCommand::addToken(const vector<uint8_t> &token)
 {
     LOG(D1) << "Entering addToken(vector<uint8_t>)";
     for (uint32_t i = 0; i < token.size(); i++) {
@@ -285,4 +286,7 @@ DtaCommand::setHSN(uint32_t HSN)
 DtaCommand::~DtaCommand()
 {
     LOG(D1) << "Destroying DtaCommand";
+    // Commands can carry password hashes (session start, C_PIN set)
+    DtaSecureZero(commandbuffer, sizeof(commandbuffer));
+    DtaSecureZero(responsebuffer, sizeof(responsebuffer));
 }

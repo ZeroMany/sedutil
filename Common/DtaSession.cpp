@@ -98,6 +98,7 @@ DtaSession::start(OPAL_UID SP, char * HostChallenge, vector<uint8_t> SignAuthori
 {
     LOG(D1) << "Entering DtaSession::startSession ";
 	vector<uint8_t> hash;
+	DtaWipeOnExit wipeHash(hash);
 	int settimeout = d->isEprise();
 	lastRC = 0;
 
@@ -167,6 +168,7 @@ DtaSession::authenticate(vector<uint8_t> Authority, char * Challenge)
 {
 	LOG(D1) << "Entering DtaSession::authenticate ";
 	vector<uint8_t> hash;
+	DtaWipeOnExit wipeHash(hash);
 	DtaCommand *cmd = new DtaCommand();
 	if (NULL == cmd) {
 		LOG(E) << "Unable to create session object ";

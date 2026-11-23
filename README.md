@@ -4,6 +4,10 @@ Intel and AMD Ryzen: This SEDutil fork includes support for intel and AMD Ryzen 
 
 Note: This version of SEDutil is not compatible with SHA-1 versions of SEDutil
 
+Step-by-step setup of encryption and the boot unlock screen (PBA): [docs/FDE-SETUP-GUIDE.md](docs/FDE-SETUP-GUIDE.md)
+
+Quick reference for everyday commands (check, lock, unlock, change password, set up, remove): [docs/QUICK-REFERENCE-WINDOWS.md](docs/QUICK-REFERENCE-WINDOWS.md) (Windows), [docs/QUICK-REFERENCE-LINUX.md](docs/QUICK-REFERENCE-LINUX.md) (Linux)
+
 This software is Copyright 2014-2017 Bright Plaza Inc. <drivetrust@drivetrust.com>
 
 This file is part of sedutil.
@@ -20,6 +24,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
+The full license text is in [COPYING](COPYING).
 
 
 sedutil - The Drive Trust Alliance Self Encrypting Drive Utility
@@ -277,8 +282,8 @@ If there is an issue after enabling locking you can either disable locking or re
 **If you want to disable Locking and the PBA:**
 
 ```
-sedutil-cli -–disableLockingRange 0 <password> <drive>  
-sedutil-cli –-setMBREnable off <password> <drive>
+sedutil-cli -âdisableLockingRange 0 <password> <drive>  
+sedutil-cli â-setMBREnable off <password> <drive>
 ```
 
 Expected Output:  
@@ -292,8 +297,8 @@ Expected Output:
 You can re-enable locking and the PBA using this command sequence:  
 
 ```
-sedutil-cli -–enableLockingRange 0 <password> <drive>      
-sedutil-cli –-setMBREnable on <password> <drive>  
+sedutil-cli -âenableLockingRange 0 <password> <drive>      
+sedutil-cli â-setMBREnable on <password> <drive>  
 ```
 
 Expected Output:  

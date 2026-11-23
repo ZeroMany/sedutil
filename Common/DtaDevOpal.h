@@ -87,7 +87,7 @@ public:
          * @param value data to be stored the the column 
          */
 	uint8_t setTable(vector<uint8_t> table, OPAL_TOKEN name,
-		vector<uint8_t> value);
+		const vector<uint8_t> &value);
          /** set a single column in an object table 
          * @param table the UID of the table
          * @param name the column name to be set

@@ -62,7 +62,7 @@ public:
     /** Add a Token to the bytstream of type vector<uint8_t>.
      * This token must be a complete token properly encoded
      * with the proper TCG bytestream header information  */
-    void addToken(std::vector<uint8_t> token);
+    void addToken(const std::vector<uint8_t> &token);
     /** Add a Token to the bytstream of type uint64. */
     void addToken(uint64_t number);
     /** Set the commid to be used in the command. */

@@ -436,7 +436,9 @@ uint8_t DtaDevEnterprise::setPassword(char * password, char * userid, char * new
 	}
 
 	std::vector<uint8_t> hash;
+	DtaWipeOnExit wipeHash(hash);
 	if ((newpassword == NULL) || (*newpassword == '\0')) {
+		hash.reserve(260); // no reallocation, so no stray unwiped copies
 		hash.push_back(0xd0);
 		hash.push_back((uint8_t)strnlen(newpwd, 255));
 		for (unsigned int i = 0; i < strnlen(newpwd, 255); i++) {
@@ -587,7 +589,8 @@ uint8_t DtaDevEnterprise::setupLockingRange(uint8_t lockingrange, uint64_t start
 uint8_t DtaDevEnterprise::setupLockingRange_SUM(uint8_t lockingrange, uint64_t start,
 	uint64_t length, char * password) {
 	LOG(D1) << "Entering DtaDevEnterprise::setupLockingRange_SUM";
-	if (0 == lockingrange) { LOG(E) << start << length << password; }
+	(void)lockingrange; (void)start; (void)length; (void)password;
+	LOG(E) << "setupLockingRange_SUM is not supported on Enterprise drives";
 	LOG(D1) << "Exiting DtaDevEnterprise::setupLockingRange_SUM";
 	return 0;
 }
@@ -1161,6 +1164,7 @@ uint8_t DtaDevEnterprise::setBandsEnabled(int16_t lockingrange, char * password)
 uint8_t DtaDevEnterprise::initLSPUsers(char * defaultPassword, char * newPassword)
 {
     vector<uint8_t> user, usercpin, hash, erasemaster, table;
+    DtaWipeOnExit wipeHash(hash);
 	uint8_t lastRC;
 	LOG(D1) << "Entering DtaDevEnterprise::initLSPUsers()";
 
@@ -1315,9 +1319,11 @@ uint8_t DtaDevEnterprise::setSIDPassword(char * oldpassword, char * newpassword,
 	}
 
 	std::vector<uint8_t> hash;
+	DtaWipeOnExit wipeHash(hash);
 	if (hashnewpwd) {
 		DtaHashPwd(hash, newpwd, this);
 	} else {
+		hash.reserve(260); // no reallocation, so no stray unwiped copies
 		hash.push_back(0xd0);
 		hash.push_back((uint8_t)strnlen(newpwd, 255));
 		for (uint16_t i = 0; i < strnlen(newpwd, 255); i++) {
@@ -1342,7 +1348,7 @@ uint8_t DtaDevEnterprise::setTable(vector<uint8_t> table, const char *name,
 	return(setTable(table, name, token));
 }
 uint8_t DtaDevEnterprise::setTable(vector<uint8_t> table, const char *name, 
-	vector<uint8_t> value)
+	const vector<uint8_t> &value)
 {
 	LOG(D1) << "Entering DtaDevEnterprise::setTable";
 	uint8_t lastRC;
