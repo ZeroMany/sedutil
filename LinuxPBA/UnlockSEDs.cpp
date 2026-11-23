@@ -120,7 +120,7 @@ uint8_t UnlockSEDs(char * password) {
     vector<string> devices = waitForDrives();
     if (devices.empty())
         pbaStatus("No drives found\n");
-    for (uint16_t i = 0; i < devices.size(); i++) {
+    for (size_t i = 0; i < devices.size(); i++) {
         snprintf(devref, sizeof(devref), "/dev/%s", devices[i].c_str());
         tempDev = new DtaDevGeneric(devref);
         if (!tempDev->isPresent()) {
