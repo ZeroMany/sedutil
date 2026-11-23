@@ -1,0 +1,6 @@
+#!/bin/sh
+# Minimal start-up for the PBA: kernel messages off the screen, then return
+# so init can start the PBA. No services, no network.
+echo 1 > /proc/sys/kernel/printk 2>/dev/null
+echo 1 > /proc/sys/kernel/dmesg_restrict 2>/dev/null
+exit 0

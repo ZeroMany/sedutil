@@ -190,6 +190,8 @@ Doxygen/
 /images/*/*
 !/images/buildroot/
 !/images/buildroot/*
+!/images/uefi/
+!/images/uefi/*
 /LinuxPBA/dist/
 /linux/CLI/dist/
 # inno installer output

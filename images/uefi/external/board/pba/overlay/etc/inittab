@@ -1,0 +1,11 @@
+# sedutil PBA inittab (BusyBox init).
+# There is deliberately no getty and no shell on any console: init starts
+# the PBA on the first virtual console, and the PBA always ends in a reboot.
+::sysinit:/bin/mount -t proc proc /proc
+::sysinit:/bin/mount -t sysfs sysfs /sys
+::sysinit:/bin/mkdir -p /dev/pts /dev/shm
+::sysinit:/bin/mount -a
+::sysinit:/etc/init.d/rcS
+tty1::respawn:/sbin/pba-start
+::ctrlaltdel:/sbin/reboot -f
+::shutdown:/bin/sync

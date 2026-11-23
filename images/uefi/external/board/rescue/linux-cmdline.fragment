@@ -1,0 +1,2 @@
+# libata.allow_tpm=1 lets sedutil send Opal (TCG) commands to SATA drives.
+CONFIG_CMDLINE="console=ttyS0,115200 console=tty0 loglevel=4 libata.allow_tpm=1"
