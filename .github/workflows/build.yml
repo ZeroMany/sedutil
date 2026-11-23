@@ -24,12 +24,15 @@ jobs:
           make -j"$(nproc)"
       - name: Password hash self-test
         run: ./sedutil-cli --validatePBKDF2
+      - name: Collect files
+        run: |
+          mkdir -p dist/docs
+          cp sedutil-cli linuxpba COPYING dist/
+          cp docs/*.md dist/docs/
       - uses: actions/upload-artifact@v4
         with:
           name: sedutil-linux-x64
-          path: |
-            sedutil-cli
-            linuxpba
+          path: dist
 
   windows:
     runs-on: windows-latest
@@ -42,7 +45,13 @@ jobs:
         run: msbuild windows\CLI\CLI.sln /m /p:Configuration=Release /p:Platform=x64
       - name: Password hash self-test
         run: windows\CLI\x64\Release\sedutil-cli.exe --validatePBKDF2
+      - name: Collect files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist\docs | Out-Null
+          Copy-Item windows\CLI\x64\Release\sedutil-cli.exe, COPYING dist\
+          Copy-Item docs\*.md dist\docs\
       - uses: actions/upload-artifact@v4
         with:
           name: sedutil-windows-x64
-          path: windows\CLI\x64\Release\sedutil-cli.exe
+          path: dist
