@@ -19,6 +19,7 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
  * C:E********************************************************************** */
 #pragma once
 #include <vector>
+#include "DtaSecureZero.h"
 class DtaDev;
 
 using namespace std;

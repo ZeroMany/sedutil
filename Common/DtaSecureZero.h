@@ -29,3 +29,23 @@ static inline void DtaSecureZero(void *buf, size_t len)
 	volatile unsigned char *p = (volatile unsigned char *)buf;
 	while (len--) *p++ = 0;
 }
+
+#ifdef __cplusplus
+#include <vector>
+#include <stdint.h>
+
+/** Wipes a byte vector when it goes out of scope, on every return path.
+ *
+ * Declare one right after a vector that will hold a password or a password
+ * hash:  std::vector<uint8_t> hash; DtaWipeOnExit wipeHash(hash);
+ */
+class DtaWipeOnExit {
+public:
+	explicit DtaWipeOnExit(std::vector<uint8_t> &v) : vec(v) {}
+	~DtaWipeOnExit() { DtaSecureZero(vec.data(), vec.capacity()); }
+	DtaWipeOnExit(const DtaWipeOnExit &) = delete;
+	DtaWipeOnExit &operator=(const DtaWipeOnExit &) = delete;
+private:
+	std::vector<uint8_t> &vec;
+};
+#endif

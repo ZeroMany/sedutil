@@ -70,6 +70,7 @@ void DtaHashPwd(vector<uint8_t> &hash, char * password, DtaDev * d)
 
     if (d->no_hash_passwords) {
         hash.clear();
+	hash.reserve(36); // no reallocation, so no stray unwiped copies
 	for (uint16_t i = 0; i < strnlen(password, 32); i++)
 		hash.push_back(password[i]);
 	// add the token overhead

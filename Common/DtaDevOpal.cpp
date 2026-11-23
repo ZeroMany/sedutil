@@ -690,6 +690,7 @@ uint8_t DtaDevOpal::setPassword(char * password, char * userid, char * newpasswo
 	LOG(D1) << "Entering DtaDevOpal::setPassword" ;
 	uint8_t lastRC;
 	std::vector<uint8_t> userCPIN, hash;
+	DtaWipeOnExit wipeHash(hash);
 	session = new DtaSession(this);
 	if (NULL == session) {
 		LOG(E) << "Unable to create session object ";
@@ -720,6 +721,7 @@ uint8_t DtaDevOpal::setNewPassword_SUM(char * password, char * userid, char * ne
 	LOG(D1) << "Entering DtaDevOpal::setNewPassword_SUM";
 	uint8_t lastRC;
 	std::vector<uint8_t> userCPIN, hash;
+	DtaWipeOnExit wipeHash(hash);
 	session = new DtaSession(this);
 	if (NULL == session) {
 		LOG(E) << "Unable to create session object ";
@@ -1482,6 +1484,7 @@ uint8_t DtaDevOpal::setSIDPassword(char * oldpassword, char * newpassword,
 	uint8_t hasholdpwd, uint8_t hashnewpwd)
 {
 	vector<uint8_t> hash, table;
+	DtaWipeOnExit wipeHash(hash);
 	LOG(D1) << "Entering DtaDevOpal::setSIDPassword()";
 	uint8_t lastRC;
 	session = new DtaSession(this);
@@ -1505,6 +1508,7 @@ uint8_t DtaDevOpal::setSIDPassword(char * oldpassword, char * newpassword,
 		DtaHashPwd(hash, newpassword, this);
 	}
 	else {
+		hash.reserve(260); // no reallocation, so no stray unwiped copies
 		hash.push_back(0xd0);
 		hash.push_back((uint8_t)strnlen(newpassword, 255));
 		for (uint16_t i = 0; i < strnlen(newpassword, 255); i++) {
@@ -1531,7 +1535,7 @@ uint8_t DtaDevOpal::setTable(vector<uint8_t> table, OPAL_TOKEN name,
 }
 
 uint8_t DtaDevOpal::setTable(vector<uint8_t> table, OPAL_TOKEN name, 
-	vector<uint8_t> value)
+	const vector<uint8_t> &value)
 {
 	LOG(D1) << "Entering DtaDevOpal::setTable";
 	uint8_t lastRC;
