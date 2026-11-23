@@ -1,8 +1,7 @@
 # sedutil quick reference (Windows)
 
-Everyday commands for Opal self-encrypting drives, with examples. Linux works the
-same way: only the drive names differ (`/dev/nvme0` or `/dev/sda` instead of
-`\\.\PhysicalDrive2`).
+Everyday commands for Opal self-encrypting drives, with examples. For Linux, see
+[QUICK-REFERENCE-LINUX.md](QUICK-REFERENCE-LINUX.md).
 
 ## Before you start
 
@@ -12,7 +11,24 @@ same way: only the drive names differ (`/dev/nvme0` or `/dev/sda` instead of
 - **Type `-` in place of any password** and sedutil asks for it at a hidden prompt.
   A password typed straight into the command line ends up in PowerShell's history
   file in plain text. When you set a new password, the prompt asks for it twice.
-- Never lock, erase or revert the drive Windows is running from.
+
+  > **If you typed a password into the command line by mistake**, remove it from
+  > PowerShell's history. Either open the history file and delete that line:
+  >
+  > ```powershell
+  > notepad (Get-PSReadLineOption).HistorySavePath
+  > ```
+  >
+  > or delete the whole history file:
+  >
+  > ```powershell
+  > Remove-Item (Get-PSReadLineOption).HistorySavePath
+  > ```
+  >
+  > Then close every PowerShell window, so the up-arrow keys can't bring the
+  > password back either.
+
+- **Warning: Never lock, erase or revert the drive Windows is running from.**
 - Don't use `-n`. It turns off password hashing, and a drive set up without
   hashing can't be unlocked by the boot screen (PBA).
 - Back up before anything in the "Changes the drive" sections.
@@ -58,7 +74,7 @@ Replace `2` with your disk number.
 ```powershell
 Set-Disk -Number 2 -IsOffline $true                      # Windows finishes writing and lets go of the disk
 sedutil-cli --setLockingRange 0 LK - \\.\PhysicalDrive2  # prompts for the password
-sedutil-cli --query \\.\PhysicalDrive2                   # should show Locked = Y
+sedutil-cli --query \\.\PhysicalDrive2                   # Optional to verify the drive is locked; should show Locked = Y
 ```
 
 **Unlock**
@@ -71,7 +87,7 @@ Set-Disk -Number 2 -IsOffline $false                      # its drive letters co
 
 Notes:
 
-- Always take the disk offline before you lock it. If you lock a disk Windows is
+- **Always take the disk offline before you lock it.** If you lock a disk Windows is
   still using, data Windows hasn't written yet can be lost, and the file system
   can be damaged.
 - Windows remembers that you took a disk offline, even across restarts. If a
@@ -99,7 +115,19 @@ sedutil says so if yours does.
 sedutil-cli --setTryLimit 5 - \\.\PhysicalDrive2          # 0 removes the limit
 ```
 
+The setting is permanent: the drive stores it, so it stays through locking,
+unlocking, restarts and power cycles until you change it with `--setTryLimit` again.
+Removing Opal (`--revertNoErase` or `--revertTPer`) or a PSID erase clears it.
+What resets is the count of wrong attempts: it goes back to zero after a correct
+password and whenever the drive is power-cycled.
+
+The limit covers the Admin1 password, which is the one that unlocks the drive.
+
 ## Changes the drive: setup
+
+For a complete step-by-step setup, including the boot unlock screen (PBA) and
+what to do if something goes wrong, see
+[FDE-SETUP-GUIDE.md](FDE-SETUP-GUIDE.md). The commands below are a summary.
 
 **Set up a new data drive** (no boot screen on this drive):
 
@@ -135,14 +163,15 @@ Test the PBA image from a USB stick before you load it onto a drive.
 sedutil-cli --disableLockingRange 0 - \\.\PhysicalDrive2
 sedutil-cli --setMBREnable off - \\.\PhysicalDrive2
 sedutil-cli --revertNoErase - \\.\PhysicalDrive2         # Admin1 password
+sedutil-cli --query \\.\PhysicalDrive2                   # must show LockingEnabled = N; if not, stop here
 sedutil-cli --revertTPer - \\.\PhysicalDrive2            # SID password
 ```
 
-Do them in this order. `--revertTPer` on its own, without `--revertNoErase`
+Do them in this order. **Warning:** `--revertTPer` on its own, without `--revertNoErase`
 first, **erases the drive**.
 
 **Forgotten password: erase the drive with its PSID.** The PSID is printed on
-the drive's label (32 characters). This destroys all data on the drive, and it's
+the drive's label (32 characters; type it in capitals, without dashes). This destroys all data on the drive, and it's
 the only way back:
 
 ```powershell
