@@ -8,7 +8,7 @@ It follows the original
 [Drive Trust Alliance instructions](https://github.com/Drive-Trust-Alliance/sedutil/wiki/Encrypting-your-drive),
 adapted for NVMe drives and AMD Ryzen systems with the 64-bit UEFI images from
 this fork (or ChubbyAnt's, which it's based on). For everyday commands once
-you're set up, see [QUICK-REFERENCE.md](QUICK-REFERENCE.md) (Windows) and
+you're set up, see [QUICK-REFERENCE-WINDOWS.md](QUICK-REFERENCE-WINDOWS.md) (Windows) and
 [QUICK-REFERENCE-LINUX.md](QUICK-REFERENCE-LINUX.md).
 
 > **Back up all your data before you start.** A wrong command or a drive with

@@ -6,7 +6,7 @@ Note: This version of SEDutil is not compatible with SHA-1 versions of SEDutil
 
 Step-by-step setup of encryption and the boot unlock screen (PBA): [docs/FDE-SETUP-GUIDE.md](docs/FDE-SETUP-GUIDE.md)
 
-Quick reference for everyday commands (check, lock, unlock, change password, set up, remove): [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md) (Windows), [docs/QUICK-REFERENCE-LINUX.md](docs/QUICK-REFERENCE-LINUX.md) (Linux)
+Quick reference for everyday commands (check, lock, unlock, change password, set up, remove): [docs/QUICK-REFERENCE-WINDOWS.md](docs/QUICK-REFERENCE-WINDOWS.md) (Windows), [docs/QUICK-REFERENCE-LINUX.md](docs/QUICK-REFERENCE-LINUX.md) (Linux)
 
 This software is Copyright 2014-2017 Bright Plaza Inc. <drivetrust@drivetrust.com>
 

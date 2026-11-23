@@ -1,7 +1,7 @@
 # sedutil quick reference (Linux)
 
 Everyday commands for Opal self-encrypting drives, with examples. For Windows, see
-[QUICK-REFERENCE.md](QUICK-REFERENCE.md).
+[QUICK-REFERENCE-WINDOWS.md](QUICK-REFERENCE-WINDOWS.md).
 
 ## Before you start
 
